@@ -1,0 +1,160 @@
+# $R_HOME/etc/Rprofile.site
+# Things you might want to change
+# Warning with functions in Rprofile.site : loaded into base
+
+# options(papersize="a4")
+# options(editor="notepad")
+# options(pager="internal")
+
+# set the default help type
+# options(help_type="text")
+  options(help_type="html")
+
+# General options
+options(tab.width = 3)
+#options(width = 130)
+#options(graphics.record=TRUE)
+
+# R interactive prompt
+# options(prompt="> ")
+# options(continue="+ ")
+  
+# set a site library
+# .Library.site <- file.path(chartr("\\", "/", R.home()), "site-library")
+Sys.setenv(R_LIBS = "D:/PortableApps/R/R-3.4.1-Libs")
+.libPaths(Sys.getenv('R_LIBS'))
+
+Sys.setenv(JAVA_HOME = "C:/Program Files (x86)/Java/jre1.8.0_111")
+# %ProgramFiles(x86)%\Java\jre1.8.0_111
+# "C:\Program Files (x86)\Java\jre1.8.0_111
+
+# alias qq to exit without asking for saving
+qq <- function() { q("no") }
+
+# set a CRAN mirror
+# local({r <- getOption("repos")
+#       r["CRAN"] <- "http://my.local.cran"
+#       options(repos=r)})
+
+# Give a fortune cookie, but only to interactive sessions
+# (This would need the fortunes package to be installed.)
+#  if (interactive()) 
+#    fortunes::fortune()
+
+
+
+.First <- function(){
+ #library(Hmisc)
+ #library(R2HTML)
+ cat("\nWelcome at", date(), "\n")
+}
+
+.Last <- function(){
+ cat("\nGoodbye at ", date(), "\n")
+}
+
+# My Packages
+my_package_list=c("devtools", "Hmisc", "reshape2", "dplyr", "lessR" 
+                 , "prettyR", "tables", "xtable"
+                 , "corrplot", "gplots", "ggplot2", "ggExtra", "gridExtra", "wordcloud", "playwith"
+                 , "psy", "psych", "Epi", "MASS", "car"
+                 , "foreign", "XLConnect", "xlsx", "twitteR"
+                 , "RCurl", "htmlTable", "knitr", "rmarkdown"
+                 , "shiny", "shinyjs")
+
+# RGtk2 to install standalone
+# xlsx, XLConnect -> rJava. issue when running with R 64 bit
+# https://stackoverflow.com/questions/7019912/using-the-rjava-package-on-win7-64-bit-with-r
+# playwith > cairoDevice, gWidgetsRGtk2, RGtk2 -> prompt install GTK+, gWidgets, grid
+# [GTK+](http://ftp.gnome.org/pub/gnome/binaries/win64/gtk+) [GTK+ @wikipedia](https://fr.wikipedia.org/wiki/GTK%2B)
+# R CMD javareconf
+
+				 
+# Function to check whether package is installed
+IsInstalled.package <- function(pkg_name){
+  # is.element(mypkg, installed.packages()[,1])
+  i = require(pkg_name, character.only=T, quietly=T)
+  print(i)
+  i
+}
+
+# installed package in package_list
+Installed_packages<-function( package_list){
+  ip = installed.packages()[,c(1:6)]
+  ip = ip[ip[,"Package"] %in% package_list, ]
+  cat(length(ip[,"Package"]), "packages in list installed\n")
+  print(ip[,"Package"])
+  ip
+}
+#ip_my_list = Installed_packages(my_package_list)
+
+# not installed package in package_list
+NotInstalled.packages<-function( package_list){
+   ip = installed.packages()
+   # not installed :
+   # not_ip = package_list[!(my_package_list %in% ip[,"Package"])]
+   #          my_package_list[!(my_package_list %in% installed.packages()[,"Package"])]
+   not_ip = setdiff(my_package_list, rownames(ip))
+   cat(length(not_ip), "packages in list not installed\n")
+   not_ip
+}
+#nip = NotInstalled.packages(my_package_list)
+
+# Function to check whether package is installed
+IsInstalled.package <- function(pkg_name){
+  # is.element(mypkg, installed.packages()[,1])
+  i = require(pkg_name, character.only=T, quietly=T)
+  print(i)
+  i
+}
+# usage : if (!IsInstalled.package("Hmisc"){...}
+
+
+install_package<-function( package_name){
+   p = package_name
+   if (require(p, character.only = TRUE, quietly=T)) {
+      print(paste(p, "is correctly loaded"))
+   }
+   else {
+      print(paste(p, "needs install"))
+	  install.packages(p)
+	                   #pkgs= , repos="http://cran.r-project.org"
+	  if (require(p, character.only=TRUE)) {
+	     print(paste(p, "has been installed"))   
+	  }
+	  else {print(paste(p, "has not been installed"))}
+   }
+}
+
+
+install_packages<-function( package_list){
+  ip_ok = c()
+  ip_ko = c()
+  for (p in package_list) {
+    if (!require(p, character.only = TRUE, quietly=T)) {
+      # install_package(p)
+      print(paste(p, "needs install"))
+      # trying to install
+      install.packages(p)
+      if (require(p, character.only = TRUE)){
+        print(paste(p, "has been installed"))
+		ip_ok = c(ip_ok, p)
+      } else {
+        message(paste("Warning:", p, "has not been installed"))
+		ip_ko = c(ip_ko, p)
+      }
+    }
+	  else {
+	     print(paste(p, "is correctly loaded"))
+	     ip_ok = c(ip_ok, p)
+	   }
+  }
+  print(ip_ko)
+}
+
+# install_packages(nip)
+# install_packages(c("corrplot", "gplots", "ggplot2", "ggExtra", "gridExtra"))
+# install_packages(ip_my_list[,"Package"])
+# install_packages(my_package_list)
+
+clear <- function() {cat("\f") }
